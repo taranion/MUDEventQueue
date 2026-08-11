@@ -8,7 +8,7 @@ class MUDEventQueueTest {
 
     @Test
     void moduleIsPresent() {
-        Module module = MUDEventQueue.class.getModule();
+        Module module = MUDEventPipeline.class.getModule();
         assertNotNull(module.getName(), "Module name should be set");
     }
 }
