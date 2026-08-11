@@ -11,21 +11,18 @@ import java.util.List;
  */
 public final class MUDEventPipeline {
 
+	private String name;
 	private List<MUDEventProcessor> processors = new ArrayList<>();
-	
-	
-    private MUDEventPipeline() {
-        // Utility class
-    }
     
     //-------------------------------------------------------------------
     /**
      * Add a new processor to the end of the processing chain. Processors are executed in the order they are added.
      * @param processor
      */
-    public void addProcessor(MUDEventProcessor processor) {
-    	if (!processors.containsAll(processors))
+    public MUDEventPipeline then(MUDEventProcessor processor) {
+    	//if (!processors.containsAll(processors))
     		processors.add(processor);
+    	return this;
 	}
     
     //-------------------------------------------------------------------
@@ -53,7 +50,8 @@ public final class MUDEventPipeline {
     			} else {
     				// The event has been replaced with other events, process them instead
     				// The first event in the list will be processed next, and the rest will be processed later
-    				current = newEvents.remove(0);    				
+    				current = newEvents.remove(0); 
+    				// TODO: The following line is a problem, because it will reinject the newEvents into the same MUDEventProcessor, which must not happpen.
     				events.addAll(0, newEvents);
     			}    			
     		}
