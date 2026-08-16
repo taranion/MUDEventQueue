@@ -1,14 +1,9 @@
 package org.prelle.mudevents;
 
-import java.time.Instant;
-
 /**
  * 
  */
 public interface MUDEvent {
-
-	public Object getSource();
 	
-	public Instant getTimestamp();
-	
+	public default byte[] asRawData() { return new byte[0]; }
 }

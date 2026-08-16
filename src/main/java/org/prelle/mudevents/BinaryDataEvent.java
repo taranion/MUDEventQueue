@@ -15,4 +15,19 @@ public class BinaryDataEvent extends AMUDEvent implements MUDEvent {
 		this.data = data;
 	}
 
+	//-------------------------------------------------------------------
+	public BinaryDataEvent(Object src, int data) {
+		super(src);
+		this.data = new byte[] { (byte)data };
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEvent#asRawData()
+	 */
+	@Override
+	public byte[] asRawData() {
+		return data;
+	}
+
 }

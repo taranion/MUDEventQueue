@@ -8,4 +8,7 @@ import java.util.List;
 public interface MUDEventProcessor {
 
 	public List<MUDEvent> apply(MUDEvent event);
+	
+	public default void setReversePipeline(MUDEventPipeline reversePipeline) {}
+	
 }
