@@ -37,7 +37,15 @@ public class MUDEventPipeline {
 	public String getName() {
 		return name;
 	}
-    
+
+	//-------------------------------------------------------------------
+	public String toString() {
+		StringBuilder sb = new StringBuilder(name+": ");
+		List<String> processorNames = processors.stream().map(p -> p.getName()).toList();
+		sb.append(String.join(" -> ", processorNames));
+		return sb.toString();
+	}
+   
     //-------------------------------------------------------------------
     /**
      * Add a new processor to the end of the processing chain. Processors are executed in the order they are added.
@@ -76,6 +84,7 @@ public class MUDEventPipeline {
 
     	boolean startProcessing = (pos == null);
     	for (MUDEventProcessor processor : processors) {
+    		boolean isLast = (processors.indexOf(processor) == processors.size() - 1);
     		if (logger!=null) {
 				logger.log(Logger.Level.TRACE, "  Pipeline {0} processing event {1} at processor {2}", name, currentEvents, processor.getClass().getSimpleName());
 			}
@@ -105,7 +114,7 @@ public class MUDEventPipeline {
     				}
     			} else {
     				// Consumed, do not pass to next processor
-    				if (logger!=null && !processor.getClass().getSimpleName().isBlank()) {
+    				if (logger!=null && !processor.getClass().getSimpleName().isBlank() && !isLast) {
     					logger.log(Logger.Level.DEBUG, "Processor {0} consumed {1}", processor.getClass().getSimpleName(), current.getClass().getSimpleName());
     				}
     			}

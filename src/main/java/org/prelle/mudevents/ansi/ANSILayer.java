@@ -5,7 +5,7 @@ import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.prelle.ansi.DefaultListener;
+import org.prelle.ansi.DefaultVT500Listener;
 import org.prelle.ansi.VT500Parser;
 import org.prelle.mudevents.BinaryDataEvent;
 import org.prelle.mudevents.MUDEvent;
@@ -23,11 +23,11 @@ public class ANSILayer {
 	private MUDEventProcessor receiveProcessor;
 	private MUDEventProcessor sendProcessor;
 	
-	private DefaultListener parserListener;
+	private DefaultVT500Listener parserListener;
 
 	//-------------------------------------------------------------------
 	public ANSILayer() {
-		parserListener = new DefaultListener(StandardCharsets.UTF_8);
+		parserListener = new DefaultVT500Listener(StandardCharsets.UTF_8);
 		ansi = new VT500Parser(parserListener);
 		prepareReceiver();
 		prepareSender();
@@ -51,6 +51,9 @@ public class ANSILayer {
 				} 
 				return List.of(event);
 			}
+			public String getName() {
+				return "ANSI";
+			}
 		};
 	}
 
@@ -59,8 +62,14 @@ public class ANSILayer {
 		sendProcessor = new MUDEventProcessor() {
 			@Override
 			public List<MUDEvent> apply(MUDEvent event) {
-				logger.log(Level.INFO, "SND: {0}", event);
-				return null;
+				logger.log(Level.INFO, "handle: {0}", event);
+				if (event instanceof ANSIEvent ansi) {
+					return List.of(new BinaryDataEvent(this,ansi.asRawData()));
+				}
+				return List.of(event);
+			}
+			public String getName() {
+				return "ANSI";
 			}
 		};
 	}

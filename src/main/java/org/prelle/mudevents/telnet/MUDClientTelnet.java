@@ -73,7 +73,10 @@ public class MUDClientTelnet implements TelnetProtocolListener, MUDEventProcesso
 					return List.of(event);
 				} else 
 					logger.log(Level.ERROR, "Unexpected event type received: {0}", event.getClass().getName());
-				return List.of();
+				return List.of(event);
+			}
+			public String getName() {
+				return "Telnet";
 			}
 		};
 	}
@@ -87,9 +90,15 @@ public class MUDClientTelnet implements TelnetProtocolListener, MUDEventProcesso
 				if (event instanceof TelnetCommandEvent command) {
 					var buf = TelnetEncoder.encodeEvent(command.getWrapped());
 					return List.of(new BinaryDataEvent(this, buf));
+				} else if (event instanceof BinaryDataEvent) {
+					// Pass Event
+					return List.of(event);
 				} else
 					logger.log(Level.WARNING, "Unexpected event type received in send processor: {0}", event.getClass().getName());
 				return null;
+			}
+			public String getName() {
+				return "Telnet";
 			}
 		};
 	}
@@ -177,6 +186,15 @@ public class MUDClientTelnet implements TelnetProtocolListener, MUDEventProcesso
 	@Override
 	public void telnetReady() {
 		telnetEvents.add(new TelnetReadyEvent(this)); // 
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#getName()
+	 */
+	@Override
+	public String getName() {
+		return "Telnet";
 	}
 
 }
