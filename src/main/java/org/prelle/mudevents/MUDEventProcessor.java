@@ -9,7 +9,9 @@ public interface MUDEventProcessor {
 	
 	public default String getName() { return getClass().getSimpleName(); }
 
-	public List<MUDEvent> apply(MUDEvent event);
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event);
+
+	public List<PipeEvent> onSendToRemote(PipeEvent event);
 	
 	public default void setReversePipeline(MUDEventPipeline reversePipeline) {}
 	

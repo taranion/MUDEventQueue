@@ -1,15 +1,10 @@
 package org.prelle.mudevents.telnet;
 
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 
 /**
  * All protocols we support have been either rejected or confirmed.
  */
-public class TelnetReadyEvent extends AMUDEvent {
-
-	//-------------------------------------------------------------------
-	public TelnetReadyEvent(Object src) {
-		super(src);
-	}
+public class TelnetReadyEvent implements PipeEvent {
 
 }

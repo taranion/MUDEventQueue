@@ -6,7 +6,7 @@ import java.lang.System.Logger.Level;
 import java.util.List;
 
 import org.prelle.mudevents.BinaryDataEvent;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.MUDEventProcessor;
 import org.prelle.mudevents.PipeClosed;
@@ -34,10 +34,10 @@ public class OutputStreamSink implements MUDEventProcessor {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#onSendToRemote(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
 		// Convert event into a byte buffer and send it
 		if (event instanceof BinaryDataEvent bde) {
 			try {
@@ -46,7 +46,7 @@ public class OutputStreamSink implements MUDEventProcessor {
 			} catch (Exception e) {
 				logger.log(Level.INFO, "Error writing to OutputStream: "+e);
 				if (reversePipe != null) {
-					reversePipe.publish(new PipeClosed(this, "Error writing to OutputStream: "+e));
+					reversePipe.publish(new PipeClosed("Error writing to OutputStream: "+e));
 				}
 			}
 		} else {
@@ -54,6 +54,15 @@ public class OutputStreamSink implements MUDEventProcessor {
 		}
 		
 		return List.of();
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#onReceiveFromRemote(org.prelle.mudevents.PipeEvent)
+	 */
+	@Override
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
+		return List.of(event);
 	}
 
 }

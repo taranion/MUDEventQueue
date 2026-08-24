@@ -1,20 +1,23 @@
 package org.prelle.mudevents;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import org.junit.jupiter.api.Test;
+import org.prelle.mudevents.MUDEventPipelineTest.SimpleEvent;
+
+import lombok.AllArgsConstructor;
+
 class MUDEventPipelineTest {
 
-    static class SimpleEvent extends AMUDEvent {
+    static class SimpleEvent implements PipeEvent {
         private final String name;
 
         public SimpleEvent(String name) {
-            super(name);
             this.name = name;
         }
 
@@ -27,17 +30,27 @@ class MUDEventPipelineTest {
             return name;
         }
     }
+    
+    @AllArgsConstructor
+    static class DummyProcessor implements MUDEventProcessor {
+    	private Function<PipeEvent,List<PipeEvent>> func;
+		@Override
+		public List<PipeEvent> onReceiveFromRemote(PipeEvent event) { return func.apply(event); }
+		@Override
+		public List<PipeEvent> onSendToRemote(PipeEvent event) { return null; }
+    	
+    }
 
     @Test
     void testForwardEvent() {
         List<String> received = new ArrayList<>();
 
         MUDEventPipeline pipeline = new MUDEventPipeline("test")
-                .then(e -> List.of(e))
-                .then(e -> {
+                .then(new DummyProcessor(e -> List.of(e) ))
+                .then(new DummyProcessor(e -> {
                     received.add(((SimpleEvent) e).getName());
                     return List.of(e);
-                });
+                }));
 
         pipeline.publish(new SimpleEvent("E1"));
 
@@ -49,11 +62,11 @@ class MUDEventPipelineTest {
         List<String> received = new ArrayList<>();
 
         MUDEventPipeline pipeline = new MUDEventPipeline("test")
-                .then(e -> null) // Consumes event
-                .then(e -> {
+                .then(new DummyProcessor(e -> null)) // Consumes event
+                .then(new DummyProcessor(e -> {
                     received.add(((SimpleEvent) e).getName());
                     return List.of(e);
-                });
+                }));
 
         pipeline.publish(new SimpleEvent("E1"));
 
@@ -65,11 +78,11 @@ class MUDEventPipelineTest {
         List<String> received = new ArrayList<>();
 
         MUDEventPipeline pipeline = new MUDEventPipeline("test")
-                .then(e -> List.of(new SimpleEvent("Substituted_" + ((SimpleEvent) e).getName())))
-                .then(e -> {
+                .then(new DummyProcessor(e -> List.of(new SimpleEvent("Substituted_" + ((SimpleEvent) e).getName()))))
+                .then(new DummyProcessor(e -> {
                     received.add(((SimpleEvent) e).getName());
                     return List.of(e);
-                });
+                }));
 
         pipeline.publish(new SimpleEvent("E1"));
 
@@ -83,11 +96,11 @@ class MUDEventPipelineTest {
         List<String> p2Seen = new ArrayList<>();
 
         MUDEventPipeline pipeline = new MUDEventPipeline("test")
-                .then(e -> {
+                .then(new DummyProcessor(e -> {
                     p0Seen.add(((SimpleEvent) e).getName());
                     return List.of(e);
-                })
-                .then(e -> {
+                }))
+                .then(new DummyProcessor(e -> {
                     p1Seen.add(((SimpleEvent) e).getName());
                     // Substitute 1 event into 3 events
                     return List.of(
@@ -95,11 +108,11 @@ class MUDEventPipelineTest {
                             new SimpleEvent("B"),
                             new SimpleEvent("C")
                     );
-                })
-                .then(e -> {
+                }))
+                .then(new DummyProcessor(e -> {
                     p2Seen.add(((SimpleEvent) e).getName());
                     return List.of(e);
-                });
+                }));
 
         pipeline.publish(new SimpleEvent("Original"));
 
@@ -118,15 +131,15 @@ class MUDEventPipelineTest {
         List<String> results = new ArrayList<>();
 
         MUDEventPipeline pipeline = new MUDEventPipeline("test")
-                .then(e -> List.of(new SimpleEvent("1"), new SimpleEvent("2")))
-                .then(e -> {
+                .then(new DummyProcessor(e -> List.of(new SimpleEvent("1"), new SimpleEvent("2"))))
+                .then(new DummyProcessor(e -> {
                     String name = ((SimpleEvent) e).getName();
                     return List.of(new SimpleEvent(name + ".A"), new SimpleEvent(name + ".B"));
-                })
-                .then(e -> {
+                }))
+                .then(new DummyProcessor(e -> {
                     results.add(((SimpleEvent) e).getName());
                     return List.of(e);
-                });
+                }));
 
         pipeline.publish(new SimpleEvent("Start"));
 
@@ -141,17 +154,17 @@ class MUDEventPipelineTest {
 
         // 500 processors each incrementing a counter in the event name
         for (int i = 0; i < processorCount; i++) {
-            pipeline.then(e -> {
+            pipeline.then(new DummyProcessor(e -> {
                 int count = Integer.parseInt(((SimpleEvent) e).getName());
                 return List.of(new SimpleEvent(String.valueOf(count + 1)));
-            });
+            }));
         }
 
         List<String> output = new ArrayList<>();
-        pipeline.then(e -> {
+        pipeline.then(new DummyProcessor(e -> {
             output.add(((SimpleEvent) e).getName());
             return List.of(e);
-        });
+        }));
 
         pipeline.publish(new SimpleEvent("0"));
 

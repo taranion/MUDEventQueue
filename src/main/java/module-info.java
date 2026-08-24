@@ -6,7 +6,7 @@ module org.prelle.mudevents {
     
 	requires lombok;
 	requires transitive org.prelle.telnet;
-	requires org.prelle.libansi;
+	requires transitive org.prelle.libansi;
 	requires org.prelle.mudansi;
 
 }

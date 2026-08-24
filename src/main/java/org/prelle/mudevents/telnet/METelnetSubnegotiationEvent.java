@@ -1,13 +1,13 @@
 package org.prelle.mudevents.telnet;
 
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.telnet.WellKnownTelnetOptions;
 import org.prelle.telnet.event.TelnetSubnegotiationEvent;
 
 /**
  * 
  */
-public class METelnetSubnegotiationEvent extends AMUDEvent implements TelnetSubnegotiationEvent {
+public class METelnetSubnegotiationEvent implements PipeEvent, TelnetSubnegotiationEvent {
 	
 	private int option;
 	private byte[] data;
@@ -16,8 +16,7 @@ public class METelnetSubnegotiationEvent extends AMUDEvent implements TelnetSubn
 	/**
 	 * @param src
 	 */
-	public METelnetSubnegotiationEvent(Object src, int option, byte[] data) {
-		super(src);
+	public METelnetSubnegotiationEvent(int option, byte[] data) {
 		this.option = option;
 		this.data = data;
 	}

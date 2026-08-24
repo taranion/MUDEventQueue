@@ -1,19 +1,17 @@
 package org.prelle.mudevents.telnet;
 
-import org.prelle.mudevents.AMUDEvent;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.telnet.event.DataEvent;
 
 /**
  * 
  */
-public class MEDataEvent extends AMUDEvent implements DataEvent, MUDEvent {
+public class MEDataEvent implements DataEvent, PipeEvent {
 
 	private byte[] data;
 	
 	//-------------------------------------------------------------------
 	public MEDataEvent(MUDEventsTelnetEventFactory factory, byte[] data) {
-		super(factory);
 		this.data = data;
 	}
 

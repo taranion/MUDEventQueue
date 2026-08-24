@@ -5,7 +5,7 @@ import lombok.Getter;
 /**
  * 
  */
-public class PipeClosed extends AMUDEvent {
+public class PipeClosed implements PipeEvent {
 	
 	@Getter
 	private String reason;
@@ -14,8 +14,7 @@ public class PipeClosed extends AMUDEvent {
 	/**
 	 * @param src
 	 */
-	public PipeClosed(Object src, String reason) {
-		super(src);
+	public PipeClosed(String reason) {
 		this.reason = reason;
 	}
 

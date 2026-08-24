@@ -1,6 +1,7 @@
 package org.prelle.mudevents;
 
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,9 @@ import lombok.Setter;
  */
 public class MUDEventPipeline {
 
-	private Logger logger;;
+	@Getter
+	private boolean isSendPipe;
+	private Logger logger;
 	private String name;
 	private List<MUDEventProcessor> processors = new ArrayList<>();
 	
@@ -24,12 +27,18 @@ public class MUDEventPipeline {
     
     //-------------------------------------------------------------------
 	public MUDEventPipeline(String name) {
-		this.name = name;
+		this(name, false);
 	}
     
     //-------------------------------------------------------------------
-	public MUDEventPipeline(String name, Logger logger) {
+	public MUDEventPipeline(String name, boolean isSend) {
 		this.name = name;
+		this.isSendPipe = isSend;
+	}
+    
+    //-------------------------------------------------------------------
+	public MUDEventPipeline(String name, boolean isSend, Logger logger) {
+		this(name, isSend);
 		this.logger = logger;
 	}
 
@@ -59,7 +68,19 @@ public class MUDEventPipeline {
 	}
     
     //-------------------------------------------------------------------
-    public <T extends MUDEvent> void publish(T event) {
+    /**
+     * Add a new processor to the begin of the processing chain. Processors are executed in the order they are added.
+     * @param processor
+     */
+    public MUDEventPipeline before(MUDEventProcessor processor) {
+    	//if (!processors.containsAll(processors))
+    		processors.add(0,processor);
+    	return this;
+	}
+    
+    //-------------------------------------------------------------------
+    public <T extends PipeEvent> void publish(T event) {
+    	logger.log(Level.INFO, "{2}: publish: {0} to {1} processors", event, processors.size(), name);
     	publishAt(null, event, true);
     }
     
@@ -68,9 +89,9 @@ public class MUDEventPipeline {
      * @param <T>
      * @param event
      */
-    public <T extends MUDEvent> void publishAt(MUDEventProcessor pos, T event, boolean before) {
+    public <T extends PipeEvent> void publishAt(MUDEventProcessor pos, T event, boolean before) {
     	if (logger!=null) {
-    		logger.log(Logger.Level.INFO, "Pipeline {0} publishing event {1} at {2} (before={3})", name, event.getClass().getSimpleName(), pos==null?"start":pos.getClass().getSimpleName(), before);
+    		logger.log(Logger.Level.DEBUG, "Pipeline {0} publishing event {1} at {2} (before={3})", name, event.getClass().getSimpleName(), pos==null?"start":pos.getClass().getSimpleName(), before);
     	}
 		// Send an event to all processors in the chain. Every processor can choose to 
     	// either do nothing, consume or replace the events with other events, before
@@ -79,7 +100,7 @@ public class MUDEventPipeline {
     		return;
     	}
 
-    	List<MUDEvent> currentEvents = new ArrayList<>();
+    	List<PipeEvent> currentEvents = new ArrayList<>();
     	currentEvents.add(event);
 
     	boolean startProcessing = (pos == null);
@@ -95,19 +116,19 @@ public class MUDEventPipeline {
 				if (!startProcessing && !before)
 					continue;
 			}
-    		List<MUDEvent> nextEvents = new ArrayList<>();
-    		for (MUDEvent current : currentEvents) {
+    		List<PipeEvent> nextEvents = new ArrayList<>();
+    		for (PipeEvent current : currentEvents) {
         		if (logger!=null) {
     				logger.log(Logger.Level.TRACE, "  Pipeline {0} sending event {1} to processor {2}", name, current.getClass().getSimpleName(), processor.getClass().getSimpleName());
     			}
-    			List<MUDEvent> produced = processor.apply(current);
+    			List<PipeEvent> produced = (isSendPipe)?processor.onSendToRemote(current):processor.onReceiveFromRemote(current);
     			if (produced != null && !produced.isEmpty()) {
     				if (logger!=null && produced.size() == 1 && produced.get(0) == current) {
-						logger.log(Logger.Level.TRACE, "Processor {0} passed {1} unchanged", processor.getClass().getSimpleName(), current.getClass().getSimpleName());
+						logger.log(Logger.Level.TRACE, "Processor {0} passed {1} unchanged", processor.getName(), current.getClass().getSimpleName());
 					} else if (logger!=null) {
-						logger.log(Logger.Level.INFO, "Processor {0} replaced {2} with {1}", processor.getClass().getSimpleName(), produced, current.getClass().getSimpleName());
+						logger.log(Logger.Level.DEBUG, "Processor {0} replaced {2} with {1}", processor.getName(), produced, current.getClass().getSimpleName());
 					}
-    				for (MUDEvent p : produced) {
+    				for (PipeEvent p : produced) {
     					if (p != null) {
     						nextEvents.add(p);
     					}
@@ -115,7 +136,7 @@ public class MUDEventPipeline {
     			} else {
     				// Consumed, do not pass to next processor
     				if (logger!=null && !processor.getClass().getSimpleName().isBlank() && !isLast) {
-    					logger.log(Logger.Level.DEBUG, "Processor {0} consumed {1}", processor.getClass().getSimpleName(), current.getClass().getSimpleName());
+    					logger.log(Logger.Level.WARNING, "{2}: Processor {0} consumed {1}", processor.getName(), current.getClass().getSimpleName(), name);
     				}
     			}
     		}

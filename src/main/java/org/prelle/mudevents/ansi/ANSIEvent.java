@@ -1,12 +1,12 @@
 package org.prelle.mudevents.ansi;
 
 import org.prelle.ansi.AParsedElement;
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 
 /**
  * 
  */
-public class ANSIEvent extends AMUDEvent {
+public class ANSIEvent implements PipeEvent {
 	
 	private AParsedElement fragment;
 
@@ -14,8 +14,7 @@ public class ANSIEvent extends AMUDEvent {
 	/**
 	 * @param src
 	 */
-	public ANSIEvent(Object src, AParsedElement fragment) {
-		super(src);
+	public ANSIEvent(AParsedElement fragment) {
 		this.fragment = fragment;
 	}
 
@@ -31,7 +30,7 @@ public class ANSIEvent extends AMUDEvent {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEvent#asRawData()
+	 * @see org.prelle.mudevents.PipeEvent#asRawData()
 	 */
 	@Override
 	public byte[] asRawData() { 

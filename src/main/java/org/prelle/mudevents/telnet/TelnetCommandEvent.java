@@ -1,17 +1,16 @@
 package org.prelle.mudevents.telnet;
 
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.telnet.event.TelnetEvent;
 
 import lombok.Getter;
 
-public class TelnetCommandEvent extends AMUDEvent {
+public class TelnetCommandEvent implements PipeEvent {
 	
 	@Getter private TelnetEvent wrapped;
 
 	//-------------------------------------------------------------------
-	public TelnetCommandEvent(Object src, TelnetEvent data) {
-		super(src);
+	public TelnetCommandEvent( TelnetEvent data) {
 		this.wrapped = data;
 	}
 

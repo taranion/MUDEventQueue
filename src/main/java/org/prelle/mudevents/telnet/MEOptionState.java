@@ -1,13 +1,13 @@
 package org.prelle.mudevents.telnet;
 
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.telnet.option.TelnetOption;
 import org.prelle.telnet.protocol.OptionStateEvent;
 
 /**
  * 
  */
-public class MEOptionState extends AMUDEvent implements OptionStateEvent {
+public class MEOptionState implements PipeEvent, OptionStateEvent {
 	
 	private TelnetOption option;
 	private boolean active;
@@ -16,8 +16,7 @@ public class MEOptionState extends AMUDEvent implements OptionStateEvent {
 	/**
 	 * @param src
 	 */
-	public MEOptionState(Object src, TelnetOption option, boolean active) {
-		super(src);
+	public MEOptionState(TelnetOption option, boolean active) {
 		this.option = option;
 		this.active = active;
 	}

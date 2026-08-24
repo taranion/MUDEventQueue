@@ -1,6 +1,6 @@
 package org.prelle.mudevents.frame;
 
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * 
  */
 @Data
-public class OpenFrame extends AMUDEvent {
+public class OpenFrame implements PipeEvent {
 
 	private String parent;
 	private String id;
@@ -27,7 +27,7 @@ public class OpenFrame extends AMUDEvent {
 	 * @param src
 	 */
 	public OpenFrame() {
-		super(null);
+
 	}
 
 }

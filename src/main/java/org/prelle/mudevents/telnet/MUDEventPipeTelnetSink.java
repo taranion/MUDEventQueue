@@ -27,7 +27,7 @@ public class MUDEventPipeTelnetSink implements TelnetReturnChannel {
 	public void sendToRemote(TelnetEvent event) {
 		// Encode the event into an byte array
 		var buffer = TelnetEncoder.encodeEvent(event);
-		pipe.publishAt(parent, new BinaryDataEvent(this,buffer), false);
+		pipe.publishAt(parent, new BinaryDataEvent(buffer), false);
 	}
 
 }

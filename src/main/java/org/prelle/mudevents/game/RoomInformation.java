@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.prelle.mudansi.TextWithMarkup;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 
 /**
  * 
  */
-public interface RoomInformation extends MUDEvent {
+public interface RoomInformation extends PipeEvent {
 	
 	public static record ExitInfo(String directionLabel, String command, String title) {}
 	public static record EntityInfo(String command, TextWithMarkup title) {}

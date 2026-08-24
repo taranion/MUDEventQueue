@@ -32,7 +32,7 @@ public class MUDEventsTelnetEventFactory implements TelnetEventFactory {
 	 */
 	@Override
 	public TelnetCommand createTelnetCommand(ControlCode code) {
-		return new METelnetCommand(this, code);
+		return new METelnetCommand(code);
 	}
 
 	//-------------------------------------------------------------------
@@ -41,7 +41,7 @@ public class MUDEventsTelnetEventFactory implements TelnetEventFactory {
 	 */
 	@Override
 	public TelnetNegotiationEvent createTelnetNegotiationEvent(ControlCode code, int option) {
-		return new METelnetNegotiationEvent(this, option, code);
+		return new METelnetNegotiationEvent(option, code);
 	}
 
 	//-------------------------------------------------------------------
@@ -50,7 +50,7 @@ public class MUDEventsTelnetEventFactory implements TelnetEventFactory {
 	 */
 	@Override
 	public TelnetNegotiationEvent createTelnetNegotiationEvent(TelnetNegotiationEvent request, ControlCode answer) {
-		return new METelnetNegotiationEvent(this, request.getOption(), answer);
+		return new METelnetNegotiationEvent(request.getOption(), answer);
 	}
 
 	//-------------------------------------------------------------------
@@ -59,7 +59,7 @@ public class MUDEventsTelnetEventFactory implements TelnetEventFactory {
 	 */
 	@Override
 	public TelnetSubnegotiationEvent createTelnetSubnegotiationEvent(int option, byte[] data) {
-		return new METelnetSubnegotiationEvent(this, option, data);
+		return new METelnetSubnegotiationEvent(option, data);
 	}
 
 	//-------------------------------------------------------------------
@@ -68,7 +68,7 @@ public class MUDEventsTelnetEventFactory implements TelnetEventFactory {
 	 */
 	@Override
 	public OptionStateEvent createOptionStateEvent(TelnetOption option, boolean enabled) {
-		return new MEOptionState(this, option, enabled);
+		return new MEOptionState(option, enabled);
 	}
 
 }

@@ -1,13 +1,13 @@
 package org.prelle.mudevents.telnet;
 
-import org.prelle.mudevents.AMUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.telnet.event.TelnetCommand;
 import org.prelle.telnet.parser.TelnetConstants.ControlCode;
 
 /**
  * 
  */
-public class METelnetCommand extends AMUDEvent implements TelnetCommand {
+public class METelnetCommand implements PipeEvent, TelnetCommand {
 
 	private ControlCode code;
 	
@@ -15,8 +15,7 @@ public class METelnetCommand extends AMUDEvent implements TelnetCommand {
 	/**
 	 * @param src
 	 */
-	public METelnetCommand(Object src, ControlCode code) {
-		super(src);
+	public METelnetCommand(ControlCode code) {
 		this.code = code;
 	}
 

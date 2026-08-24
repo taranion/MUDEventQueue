@@ -28,7 +28,7 @@ public class PipeReturnChannel implements TelnetReturnChannel {
 	 */
 	@Override
 	public void sendToRemote(TelnetEvent event) throws IOException {
-		BinaryDataEvent converted = new BinaryDataEvent(null, TelnetEncoder.encodeEvent(event));
+		BinaryDataEvent converted = new BinaryDataEvent(TelnetEncoder.encodeEvent(event));
 		pipeline.publish(converted);
 	}
 

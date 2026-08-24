@@ -5,25 +5,23 @@ import lombok.Getter;
 /**
  * 
  */
-public class BinaryDataEvent extends AMUDEvent implements MUDEvent {
+public class BinaryDataEvent implements PipeEvent {
 	
 	@Getter private final byte[] data;
 
 	//-------------------------------------------------------------------
-	public BinaryDataEvent(Object src, byte[] data) {
-		super(src);
+	public BinaryDataEvent(byte[] data) {
 		this.data = data;
 	}
 
 	//-------------------------------------------------------------------
-	public BinaryDataEvent(Object src, int data) {
-		super(src);
+	public BinaryDataEvent(int data) {
 		this.data = new byte[] { (byte)data };
 	}
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEvent#asRawData()
+	 * @see org.prelle.mudevents.PipeEvent#asRawData()
 	 */
 	@Override
 	public byte[] asRawData() {
