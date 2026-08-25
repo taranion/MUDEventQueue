@@ -62,9 +62,35 @@ public class MUDEventPipeline {
      */
     public MUDEventPipeline then(MUDEventProcessor processor) {
     	processor.setReversePipeline(reversePipeline);
-    	//if (!processors.containsAll(processors))
+    	if (!processors.contains(processor))
     		processors.add(processor);
     	return this;
+	}
+    
+    //-------------------------------------------------------------------
+    /**
+     * Add a new processor directly after the given processor in the processing chain. 
+     * @param processor
+     */
+    public void insertAfter(MUDEventProcessor index, MUDEventProcessor processor) {
+    	processor.setReversePipeline(reversePipeline);
+    	int pos = processors.indexOf(index);
+    	if (!processors.contains(processor))
+    		processors.add(pos+1,processor);
+	}
+    
+    //-------------------------------------------------------------------
+    /**
+     * Add a new processor directly after the given processor in the processing chain. 
+     * @param processor
+     */
+    public void replace(MUDEventProcessor toReplace, MUDEventProcessor processor) {
+    	processor.setReversePipeline(reversePipeline);
+    	int pos = processors.indexOf(toReplace);
+    	if (!processors.contains(processor) && pos>-1) {
+    		processors.remove(toReplace);
+    		processors.add(pos,processor);
+    	}
 	}
     
     //-------------------------------------------------------------------
