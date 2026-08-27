@@ -106,7 +106,7 @@ public class MUDEventPipeline {
     
     //-------------------------------------------------------------------
     public <T extends PipeEvent> void publish(T event) {
-    	logger.log(Level.INFO, "{2}: publish: {0} to {1} processors", event, processors.size(), name);
+    	logger.log(Level.INFO, "{2}: publish: {0} to {1} processors", event.getClass(), processors.size(), name);
     	publishAt(null, event, true);
     }
     

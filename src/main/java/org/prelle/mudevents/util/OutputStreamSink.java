@@ -6,6 +6,7 @@ import java.lang.System.Logger.Level;
 import java.util.List;
 
 import org.prelle.mudevents.BinaryDataEvent;
+import org.prelle.mudevents.CloseClientEvent;
 import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.MUDEventProcessor;
@@ -47,6 +48,15 @@ public class OutputStreamSink implements MUDEventProcessor {
 				logger.log(Level.INFO, "Error writing to OutputStream: "+e);
 				if (reversePipe != null) {
 					reversePipe.publish(new PipeClosed("Error writing to OutputStream: "+e));
+				}
+			}
+		} else if (event instanceof CloseClientEvent) {
+			try {
+				out.close();
+			} catch (Exception e) {
+				logger.log(Level.INFO, "Error closing OutputStream: "+e);
+				if (reversePipe != null) {
+					reversePipe.publish(new PipeClosed("Error closing OutputStream: "+e));
 				}
 			}
 		} else {

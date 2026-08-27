@@ -35,14 +35,14 @@ public class ANSILayer implements MUDEventProcessor {
 	@Override
 	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		if (event instanceof BinaryDataEvent binary) {
-		for (byte b : binary.getData()) {
-			ansi.parse(b & 0xff);
-		}
-		parserListener.releaseCollectPrintable();
-		
-		return parserListener.consumeFragments().stream()
-				.map(frag -> (PipeEvent)new ANSIEvent(frag))
-				.toList();
+			for (byte b : binary.getData()) {
+				ansi.parse(b & 0xff);
+			}
+			parserListener.releaseCollectPrintable();
+			
+			return parserListener.consumeFragments().stream()
+					.map(frag -> (PipeEvent)new ANSIEvent(frag))
+					.toList();
 		} 
 		return List.of(event);
 	}
@@ -53,7 +53,7 @@ public class ANSILayer implements MUDEventProcessor {
 	 */
 	@Override
 	public List<PipeEvent> onSendToRemote(PipeEvent event) {
-		logger.log(Level.INFO, "handle: {0}", event);
+		logger.log(Level.TRACE, "handle: {0}", event);
 		if (event instanceof ANSIEvent ansi) {
 			return List.of(new BinaryDataEvent(ansi.asRawData()));
 		}

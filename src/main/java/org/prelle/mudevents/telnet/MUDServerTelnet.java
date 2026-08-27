@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import org.prelle.ansi.C0Code;
 import org.prelle.mudevents.BinaryDataEvent;
+import org.prelle.mudevents.CloseClientEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.MUDEventProcessor;
 import org.prelle.mudevents.PipeEvent;
@@ -72,14 +73,13 @@ public class MUDServerTelnet implements TelnetProtocolListener, MUDEventProcesso
 			logger.log(Level.INFO, "Telnet protocol started.");
 			telnet.initializeExtensions();
 			return List.of(event);
-		} else 
-			logger.log(Level.ERROR, "Unexpected event type received: {0}", event.getClass().getName());
+		} 
 		return List.of(event);
 	}
 
 	//-------------------------------------------------------------------
 	public List<PipeEvent> onSendToRemote(PipeEvent event) {
-		logger.log(Level.INFO, "SND: {0}", event);
+		logger.log(Level.DEBUG, "SND: {0}", event);
 		if (event instanceof TelnetCommandEvent command) {
 			var buf = TelnetEncoder.encodeEvent(command.getWrapped());
 			return List.of(new BinaryDataEvent(buf));
@@ -97,6 +97,8 @@ public class MUDServerTelnet implements TelnetProtocolListener, MUDEventProcesso
 			return List.of(new BinaryDataEvent(buf));
 		} else if (event instanceof BinaryDataEvent) {
 			// Pass Event
+			return List.of(event);
+		} else if (event instanceof CloseClientEvent) {
 			return List.of(event);
 		} else
 			logger.log(Level.WARNING, "Unexpected event type received in send processor: {0}", event.getClass().getName());
@@ -133,6 +135,7 @@ public class MUDServerTelnet implements TelnetProtocolListener, MUDEventProcesso
 		logger.log(Level.INFO, "Telnet event: {0} / {1}", event, event.getClass());
 		switch (event) {
 		case DataEvent dataEvent -> {
+			System.err.println("MUDServerTelnet: Telnet data event: "+new String(dataEvent.getData()));
 			telnetEvents.add(new BinaryDataEvent(dataEvent.getData()));
 		}
 		case TelnetCommandEvent cmdEv  -> {
@@ -149,7 +152,7 @@ public class MUDServerTelnet implements TelnetProtocolListener, MUDEventProcesso
 			if (event instanceof PipeEvent) {
 				telnetEvents.add((PipeEvent)event);
 			} else {
-				System.err.println("Unhandled Telnet event type: "+event.getClass().getName());
+				System.err.println("MUDServerTelnet: Unhandled Telnet event type: "+event.getClass().getName());
 				telnetEvents.add(new TelnetCommandEvent(event));
 			}
 			}
