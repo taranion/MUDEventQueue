@@ -130,7 +130,7 @@ public class MUDEventPipeline {
     	currentEvents.add(event);
 
     	boolean startProcessing = (pos == null);
-    	for (MUDEventProcessor processor : processors) {
+    	for (MUDEventProcessor processor : new ArrayList<>(processors)) {
     		boolean isLast = (processors.indexOf(processor) == processors.size() - 1);
     		if (logger!=null) {
 				logger.log(Logger.Level.TRACE, "  Pipeline {0} processing event {1} at processor {2}", name, currentEvents, processor.getClass().getSimpleName());

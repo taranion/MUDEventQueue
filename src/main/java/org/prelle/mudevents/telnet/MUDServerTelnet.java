@@ -135,7 +135,7 @@ public class MUDServerTelnet implements TelnetProtocolListener, MUDEventProcesso
 		logger.log(Level.INFO, "Telnet event: {0} / {1}", event, event.getClass());
 		switch (event) {
 		case DataEvent dataEvent -> {
-			System.err.println("MUDServerTelnet: Telnet data event: "+new String(dataEvent.getData()));
+//			System.err.println("MUDServerTelnet: Telnet data event: "+new String(dataEvent.getData()));
 			telnetEvents.add(new BinaryDataEvent(dataEvent.getData()));
 		}
 		case TelnetCommandEvent cmdEv  -> {
