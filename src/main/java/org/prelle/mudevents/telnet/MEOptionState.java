@@ -23,7 +23,7 @@ public class MEOptionState implements PipeEvent, OptionStateEvent {
 
 	//-------------------------------------------------------------------
 	public String toString() {
-		return String.format("MEOptionState: %s is %s", option, active?"active":"inactive");
+		return String.format("MEOptionState:%s %s", option.getName(), active?"on":"off");
 	}
 
 	//-------------------------------------------------------------------

@@ -25,6 +25,8 @@ public class ANSIEvent implements PipeEvent {
 
 	//-------------------------------------------------------------------
 	public String toString() {
+		if (fragment!=null)
+			return fragment.getClass().getSimpleName();
 		return "ANSIEvent("+String.valueOf(fragment)+")";
 	}
 

@@ -4,6 +4,8 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,10 +22,13 @@ public class MUDEventPipeline {
 	private boolean isSendPipe;
 	private Logger logger;
 	private String name;
+	@Getter
 	private List<MUDEventProcessor> processors = new ArrayList<>();
 	
 	@Getter @Setter
 	private MUDEventPipeline reversePipeline;
+	
+	private Optional<Consumer<PipeLogEntry>> logConsumer;
     
     //-------------------------------------------------------------------
 	public MUDEventPipeline(String name) {
@@ -46,7 +51,12 @@ public class MUDEventPipeline {
 	public String getName() {
 		return name;
 	}
-
+    
+    //-------------------------------------------------------------------
+	public void setLogger(Consumer<PipeLogEntry> logConsumer) {
+		this.logConsumer = Optional.ofNullable(logConsumer);
+	}
+	
 	//-------------------------------------------------------------------
 	public String toString() {
 		StringBuilder sb = new StringBuilder(name+": ");
@@ -61,7 +71,10 @@ public class MUDEventPipeline {
      * @param processor
      */
     public MUDEventPipeline then(MUDEventProcessor processor) {
-    	processor.setReversePipeline(reversePipeline);
+    	if (reversePipeline != null) {
+			processor.setReversePipeline(reversePipeline);
+		}
+    
     	if (!processors.contains(processor))
     		processors.add(processor);
     	return this;
@@ -106,7 +119,8 @@ public class MUDEventPipeline {
     
     //-------------------------------------------------------------------
     public <T extends PipeEvent> void publish(T event) {
-    	logger.log(Level.INFO, "{2}: publish: {0} to {1} processors", event.getClass(), processors.size(), name);
+    	if (logger!=null)
+    		logger.log(Level.INFO, "{2}: publish: {0} ({1})", event.getClass().getSimpleName(), event.toString(), name);
     	publishAt(null, event, true);
     }
     
@@ -130,11 +144,13 @@ public class MUDEventPipeline {
     	currentEvents.add(event);
 
     	boolean startProcessing = (pos == null);
+    	MUDEventProcessor previousProcessor = null;
     	for (MUDEventProcessor processor : new ArrayList<>(processors)) {
     		boolean isLast = (processors.indexOf(processor) == processors.size() - 1);
     		if (logger!=null) {
 				logger.log(Logger.Level.TRACE, "  Pipeline {0} processing event {1} at processor {2}", name, currentEvents, processor.getClass().getSimpleName());
 			}
+    		// Did we already reach the processor where we want to start processing? If not, skip until we reach it.
     		if (!startProcessing) {
 				if (processor == pos) {
 					startProcessing = true;
@@ -147,6 +163,13 @@ public class MUDEventPipeline {
         		if (logger!=null) {
     				logger.log(Logger.Level.TRACE, "  Pipeline {0} sending event {1} to processor {2}", name, current.getClass().getSimpleName(), processor.getClass().getSimpleName());
     			}
+        		if (logConsumer.isPresent()) {
+					logConsumer.get().accept(new PipeLogEntry(this, 
+							previousProcessor,
+							processor, 
+							current.toString()
+							));
+				}
     			List<PipeEvent> produced = (isSendPipe)?processor.onSendToRemote(current):processor.onReceiveFromRemote(current);
     			if (produced != null && !produced.isEmpty()) {
     				if (logger!=null && produced.size() == 1 && produced.get(0) == current) {
@@ -162,7 +185,7 @@ public class MUDEventPipeline {
     			} else {
     				// Consumed, do not pass to next processor
     				if (logger!=null && !processor.getClass().getSimpleName().isBlank() && !isLast) {
-    					logger.log(Logger.Level.WARNING, "{2}: Processor {0} consumed {1}", processor.getName(), current.getClass().getSimpleName(), name);
+    					logger.log(Logger.Level.INFO, "{2}: Processor {0} consumed {1}", processor.getName(), current.getClass().getSimpleName(), name);
     				}
     			}
     		}
@@ -170,6 +193,7 @@ public class MUDEventPipeline {
     		if (currentEvents.isEmpty()) {
     			break; // All events were consumed, stop pipeline early
     		}
+    		previousProcessor = processor;
     	}
     	
     	// Idea: Send a Sync/Flush event to all processors at the end of the chain, so they can flush any buffered data.

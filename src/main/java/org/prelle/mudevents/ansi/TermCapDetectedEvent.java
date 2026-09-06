@@ -20,5 +20,9 @@ public class TermCapDetectedEvent implements PipeEvent {
 	public TermCapDetectedEvent(TerminalCapabilities capabilities) {
 		this.capabilities = capabilities;
 	}
+	
+	public String toString() {
+		return "TermCapDetected";
+	}
 
 }
