@@ -28,7 +28,7 @@ public class MUDEventPipeline {
 	@Getter @Setter
 	private MUDEventPipeline reversePipeline;
 	
-	private Optional<Consumer<PipeLogEntry>> logConsumer;
+	private Optional<Consumer<PipeLogEntry>> logConsumer = Optional.empty();
     
     //-------------------------------------------------------------------
 	public MUDEventPipeline(String name) {

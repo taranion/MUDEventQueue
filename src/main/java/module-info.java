@@ -1,6 +1,7 @@
 module org.prelle.mudevents {
     exports org.prelle.mudevents;    
     exports org.prelle.mudevents.ansi;
+    exports org.prelle.mudevents.game;
     exports org.prelle.mudevents.telnet;
     exports org.prelle.mudevents.util;
     
