@@ -97,6 +97,18 @@ public class MUDEventPipeline {
      * Add a new processor directly after the given processor in the processing chain. 
      * @param processor
      */
+    public void insertBefore(MUDEventProcessor index, MUDEventProcessor processor) {
+    	processor.setReversePipeline(reversePipeline);
+    	int pos = processors.indexOf(index);
+    	if (!processors.contains(processor))
+    		processors.add(pos,processor);
+	}
+    
+    //-------------------------------------------------------------------
+    /**
+     * Add a new processor directly after the given processor in the processing chain. 
+     * @param processor
+     */
     public void replace(MUDEventProcessor toReplace, MUDEventProcessor processor) {
     	processor.setReversePipeline(reversePipeline);
     	int pos = processors.indexOf(toReplace);
