@@ -5,7 +5,7 @@ import java.util.List;
 import org.prelle.mudevents.PipeEvent;
 
 public record EntityListEvent(
-		EntityScope scope,
+		EntityListScope scope,
 		List<EntityItem> entities
 ) implements PipeEvent {
 	public EntityListEvent {

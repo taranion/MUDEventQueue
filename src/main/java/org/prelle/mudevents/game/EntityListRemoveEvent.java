@@ -3,7 +3,7 @@ package org.prelle.mudevents.game;
 import org.prelle.mudevents.PipeEvent;
 
 public record EntityListRemoveEvent(
-		EntityScope scope,
+		EntityListScope scope,
 		String id,
 		String name
 ) implements PipeEvent {}
