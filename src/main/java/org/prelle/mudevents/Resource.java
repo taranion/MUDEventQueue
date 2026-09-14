@@ -1,64 +1,124 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Stefan Prelle <stefan at prelle dot org>
+ * SPDX-License-Identifier: MPL-2.0
+ */
 package org.prelle.mudevents;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
-@Getter
-@Setter
-@ToString
+/**
+ * 
+ */
 public class Resource {
-	private String definitionKey;
+	
+	/** Matches an ID of a ResourceDefinition */
+	private String ref;
+	private transient ResourceDefinition definition;
+	
+	/** Unbuffed healthy maximum of a lifeform */
+	@Getter @Setter
 	private int max;
-	private int current;
+	/** Amount the maximum is reduced by status effects like illness */
+	@Getter @Setter
 	private int blocked;
+	/** Light damage, easily recovered */
+	@Getter @Setter
 	private int exhausted;
+	/** Severe damage, needs heal or longer recovery */
+	@Getter @Setter
 	private int damage;
-	private ResourceDefinition definition;
+	/** Temporary points thanks to a buff */
+	@Getter @Setter
+	private int temporary;
 
-	public Resource() {
-	}
-
-	public Resource(String definitionKey, int max, int current, int blocked, int exhausted) {
-		this.definitionKey = definitionKey;
-		this.max = max;
-		this.current = current;
-		this.blocked = blocked;
-		this.exhausted = exhausted;
-		this.damage = Math.max(0, max - current - blocked - exhausted);
-	}
-
+	//-------------------------------------------------------------------
 	public Resource(ResourceDefinition def, int max) {
+		this.ref=def.getId();
 		this.definition = def;
-		this.definitionKey = def != null ? def.getId() : null;
 		this.max = max;
-		this.current = max;
 		this.blocked = 0;
 		this.exhausted = 0;
 		this.damage = 0;
+		this.temporary = 0;
 	}
 
-	public Resource(Resource other) {
-		if (other != null) {
-			this.definitionKey = other.definitionKey;
-			this.max = other.max;
-			this.current = other.current;
-			this.blocked = other.blocked;
-			this.exhausted = other.exhausted;
-			this.damage = other.damage;
-			this.definition = other.definition;
+	//-------------------------------------------------------------------
+	public Resource(String ref, int max, int current, int blocked, int exhausted) {
+		this.ref = ref;
+		this.max = max;
+		this.blocked = blocked;
+		this.exhausted = exhausted;
+		this.damage = Math.max(0, max - blocked - exhausted - current);
+		this.temporary = Math.max(0, current - (max - blocked - exhausted - this.damage));
+	}
+
+	//-------------------------------------------------------------------
+	public String toString() {
+		return ref+"="+damage+"/"+max;
+	}
+	
+	//-------------------------------------------------------------------
+	public Resource(Resource copy) {
+		this.max = copy.max;
+		this.blocked = copy.blocked;
+		this.exhausted = copy.exhausted;
+		this.damage = copy.damage;
+		this.temporary = copy.temporary;
+	}
+
+	//-------------------------------------------------------------------
+	public int getCurrent() {
+		return max - blocked - damage - exhausted + temporary;
+	}
+
+	//-------------------------------------------------------------------
+	public int getLifeRemaining() {
+		return max - damage + temporary;
+	}
+
+	//-------------------------------------------------------------------
+	public String getDefinitionKey() {
+		return ref;
+	}
+
+	//-------------------------------------------------------------------
+	public ResourceDefinition getDefinition() {
+		return definition;
+	}
+
+	//-------------------------------------------------------------------
+	public String getShortName() {
+		return definition != null ? definition.getShortName() : ref;
+	}
+
+	//-------------------------------------------------------------------
+	public String getName() {
+		return definition != null ? definition.getName() : ref;
+	}
+
+	//-------------------------------------------------------------------
+	public void setDefinition(ResourceDefinition value) {
+		this.definition = value;
+		if (value != null) {
+			this.ref = value.getId();
+		} else {
+			this.ref = null;
+		}
+		
+	}
+
+	//-------------------------------------------------------------------
+	public void increaseDamage(int value) {
+		damage += value;
+	}
+
+	//-------------------------------------------------------------------
+	public void healDamage(int value) {
+		damage -= value;
+		if (damage < 0) {
+			damage = 0;
 		}
 	}
-
-	public String getName() {
-		return definition != null ? definition.getName() : definitionKey;
-	}
-
-	public String getShortName() {
-		return definition != null ? definition.getShortName() : definitionKey;
-	}
-
-	public int getLifeRemaining() {
-		return current;
-	}
+	
 }
