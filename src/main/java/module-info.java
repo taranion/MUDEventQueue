@@ -9,5 +9,7 @@ module org.prelle.mudevents {
 	requires transitive org.prelle.telnet;
 	requires transitive org.prelle.libansi;
 	requires org.prelle.mudansi;
+	requires transitive de.rpgframework.rules;
+
 
 }

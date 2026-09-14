@@ -36,9 +36,9 @@ public class OutputStreamToPipeline extends OutputStream {
 	public void write(int b) throws IOException {
 		BinaryDataEvent event = new BinaryDataEvent(new byte[] {(byte)b});
 		if (publishAt != null) {
-			pipeline.publishAt(publishAt, event, false);
+			pipeline.sendToRemote(publishAt, event);
 		} else {
-			pipeline.publish(event);
+			pipeline.fireSend(event);
 		}
 	}
 	
@@ -46,9 +46,9 @@ public class OutputStreamToPipeline extends OutputStream {
 	public void write(byte[] b) throws IOException {
 		BinaryDataEvent event = new BinaryDataEvent(b);
 		if (publishAt != null) {
-			pipeline.publishAt(publishAt, event, false);
+			pipeline.sendToRemote(publishAt, event);
 		} else {
-			pipeline.publish(event);
+			pipeline.fireSend(event);
 		}
 	}
 	
@@ -56,11 +56,12 @@ public class OutputStreamToPipeline extends OutputStream {
    public void write(byte[] b, int off, int len) throws IOException {
 		Objects.checkFromIndexSize(off, len, b.length);
 		byte[] copied = new byte[len];
+		System.arraycopy(b, off, copied, 0, len);
 		BinaryDataEvent event = new BinaryDataEvent(copied);
 		if (publishAt != null) {
-			pipeline.publishAt(publishAt, event, false);
+			pipeline.sendToRemote(publishAt, event);
 		} else {
-			pipeline.publish(event);
+			pipeline.fireSend(event);
 		}
     }
 

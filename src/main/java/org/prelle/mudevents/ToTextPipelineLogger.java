@@ -13,6 +13,12 @@ public class ToTextPipelineLogger implements Consumer<PipeLogEntry> {
 	private List<MUDEventProcessor> drawingOrder;
 
 	//-------------------------------------------------------------------
+	public ToTextPipelineLogger(MUDEventPipeline pipeline) {
+		pipeline.setLogger(this);
+		drawingOrder = new ArrayList<>(pipeline.getProcessors());
+	}
+
+	//-------------------------------------------------------------------
 	public ToTextPipelineLogger(MUDEventPipeline rcv, MUDEventPipeline snd) {
 		rcv.setLogger(this);
 		snd.setLogger(this);
@@ -40,16 +46,13 @@ public class ToTextPipelineLogger implements Consumer<PipeLogEntry> {
 	 */
 	@Override
 	public void accept(PipeLogEntry entry) {
-		// TODO Auto-generated method stub
-		int pos = drawingOrder.indexOf(entry.getFrom())+1;
-		if (pos==-1) {
-			System.err.println("ToTextPipelineLogger: Unknown processor "+entry.getFrom().getName());
+		int pos = (entry.getFrom() != null) ? drawingOrder.indexOf(entry.getFrom()) : (entry.isOutbound() ? drawingOrder.size() : -1);
+		if (pos == -1 && entry.getFrom() != null) {
+			System.err.println("ToTextPipelineLogger: Unknown processor " + entry.getFrom().getName());
 			return;
 		}
-		StringBuilder sb = new StringBuilder();
-		// Assume 11 characters per message and 1 character for vertical line
-		int prefix = pos * 12;
-		String logLine = " ".repeat(prefix) +"|"+ entry.toString()+"|";
+		int prefix = Math.max(0, (pos + 1) * 12);
+		String logLine = " ".repeat(prefix) + "|" + entry.toString() + "|";
 		System.err.println(logLine);
 	}
 

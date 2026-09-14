@@ -170,4 +170,122 @@ class MUDEventPipelineTest {
 
         assertEquals(List.of("500"), output);
     }
+
+    @Test
+    void testBidirectionalFlow() {
+        List<String> inOrder = new ArrayList<>();
+        List<String> outOrder = new ArrayList<>();
+
+        class BidirectionalProcessor implements MUDEventProcessor {
+            private final String name;
+            public BidirectionalProcessor(String name) { this.name = name; }
+            @Override public String getName() { return name; }
+            @Override
+            public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
+                inOrder.add(name);
+                return List.of(event);
+            }
+            @Override
+            public List<PipeEvent> onSendToRemote(PipeEvent event) {
+                outOrder.add(name);
+                return List.of(event);
+            }
+        }
+
+        BidirectionalProcessor p0 = new BidirectionalProcessor("P0_Socket");
+        BidirectionalProcessor p1 = new BidirectionalProcessor("P1_Middle");
+        BidirectionalProcessor p2 = new BidirectionalProcessor("P2_App");
+
+        MUDEventPipeline pipeline = new MUDEventPipeline("bidirectional")
+                .then(p0)
+                .then(p1)
+                .then(p2);
+
+        // Inbound: from socket (0) up to app (2)
+        pipeline.fireReceive(new SimpleEvent("Inbound"));
+        assertEquals(List.of("P0_Socket", "P1_Middle", "P2_App"), inOrder);
+
+        // Outbound: from app (2) down to socket (0)
+        pipeline.fireSend(new SimpleEvent("Outbound"));
+        assertEquals(List.of("P2_App", "P1_Middle", "P0_Socket"), outOrder);
+    }
+
+    @Test
+    void testIntermediateSendAndReceive() {
+        List<String> inSeen = new ArrayList<>();
+        List<String> outSeen = new ArrayList<>();
+
+        class TestProc implements MUDEventProcessor {
+            private final String name;
+            public TestProc(String name) { this.name = name; }
+            @Override public String getName() { return name; }
+            @Override
+            public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
+                inSeen.add(name);
+                return List.of(event);
+            }
+            @Override
+            public List<PipeEvent> onSendToRemote(PipeEvent event) {
+                outSeen.add(name);
+                return List.of(event);
+            }
+        }
+
+        TestProc p0 = new TestProc("P0");
+        TestProc p1 = new TestProc("P1");
+        TestProc p2 = new TestProc("P2");
+
+        MUDEventPipeline pipeline = new MUDEventPipeline("test")
+                .then(p0)
+                .then(p1)
+                .then(p2);
+
+        // P1 sends outbound towards socket: should ONLY visit P0 (p1 itself and p2 must not be called)
+        pipeline.sendToRemote(p1, new SimpleEvent("MsgToSocket"));
+        assertEquals(List.of("P0"), outSeen);
+
+        // P1 receives inbound towards app: should ONLY visit P2 (p1 itself and p0 must not be called)
+        pipeline.receiveFromRemote(p1, new SimpleEvent("MsgToApp"));
+        assertEquals(List.of("P2"), inSeen);
+    }
+
+    @Test
+    void testReplaceProcessor() {
+        List<String> inSeen = new ArrayList<>();
+        List<String> outSeen = new ArrayList<>();
+
+        class SimpleProc implements MUDEventProcessor {
+            private final String name;
+            public SimpleProc(String name) { this.name = name; }
+            @Override public String getName() { return name; }
+            @Override
+            public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
+                inSeen.add(name);
+                return List.of(event);
+            }
+            @Override
+            public List<PipeEvent> onSendToRemote(PipeEvent event) {
+                outSeen.add(name);
+                return List.of(event);
+            }
+        }
+
+        SimpleProc p0 = new SimpleProc("P0");
+        SimpleProc p1Old = new SimpleProc("P1_OLD");
+        SimpleProc p1New = new SimpleProc("P1_NEW");
+        SimpleProc p2 = new SimpleProc("P2");
+
+        MUDEventPipeline pipeline = new MUDEventPipeline("test")
+                .then(p0)
+                .then(p1Old)
+                .then(p2);
+
+        pipeline.replace(p1Old, p1New);
+
+        pipeline.fireReceive(new SimpleEvent("In"));
+        assertEquals(List.of("P0", "P1_NEW", "P2"), inSeen);
+
+        pipeline.fireSend(new SimpleEvent("Out"));
+        assertEquals(List.of("P2", "P1_NEW", "P0"), outSeen);
+    }
 }

@@ -56,6 +56,14 @@ public class ANSILayer implements MUDEventProcessor {
 		logger.log(Level.TRACE, "handle: {0}", event);
 		if (event instanceof ANSIEvent ansi) {
 			return List.of(new BinaryDataEvent(ansi.asRawData()));
+		} else if (event instanceof org.prelle.mudevents.game.UserTypedEvent typed) {
+			String text = typed.getText();
+			if (text != null) {
+				if (!text.endsWith("\r\n") && !text.endsWith("\n")) {
+					text = text + "\r\n";
+				}
+				return List.of(new BinaryDataEvent(text.getBytes(StandardCharsets.UTF_8)));
+			}
 		}
 		return List.of(event);
 	}

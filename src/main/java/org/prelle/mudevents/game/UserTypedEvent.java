@@ -20,6 +20,11 @@ public class UserTypedEvent implements PipeEvent {
 	}
 
 	//-------------------------------------------------------------------
+	public UserTypedEvent(String text) {
+		this.text = text;
+	}
+
+	//-------------------------------------------------------------------
 	/**
 	 * @return
 	 */

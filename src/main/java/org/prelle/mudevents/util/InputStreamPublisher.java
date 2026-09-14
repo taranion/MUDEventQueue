@@ -32,19 +32,19 @@ public class InputStreamPublisher {
 				if (len < 0) {
 					// No, the inputstream was closed
 					PipeClosed event = new PipeClosed("Stream closed");
-					pipeline.publish(event);
+					pipeline.fireReceive(event);
 					break;
 				} else if (len>0) {
 					// Yes
 					byte[] copied = new byte[len];
 					System.arraycopy(buffer, 0, copied, 0, len);
 					BinaryDataEvent event = new BinaryDataEvent(copied);
-					pipeline.publish(event);
+					pipeline.fireReceive(event);
 				}
 			}
 		} catch (IOException e) {
 			PipeClosed event = new PipeClosed("IOError: "+e);
-			pipeline.publish(event);
+			pipeline.fireReceive(event);
 		}
 	}
 }

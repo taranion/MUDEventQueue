@@ -14,6 +14,11 @@ public class PipeLogEntry {
 	private MUDEventProcessor from;
 	private MUDEventProcessor to;
 	private String name;
+	private boolean outbound;
+	
+	public PipeLogEntry(MUDEventPipeline pipe, MUDEventProcessor from, MUDEventProcessor to, String name) {
+		this(pipe, from, to, name, pipe != null && pipe.isSendPipe());
+	}
 	
 	public String toString() {
 		// Limit name to 8 characters
@@ -27,7 +32,7 @@ public class PipeLogEntry {
 			// Fill with "-" to 8 characters
 			tmp = "-".repeat(8 - tmp.length())+tmp;
 		}
-		if (pipe.isSendPipe()) {
+		if (outbound) {
 			return "-"+tmp+"->";
 		} else {
 			return "<-"+tmp+"-";

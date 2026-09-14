@@ -21,6 +21,7 @@ public class OutputStreamSink implements MUDEventProcessor {
 	
 	private OutputStream out;
 	private MUDEventPipeline reversePipe;
+	private MUDEventPipeline pipeline;
 
 	//-------------------------------------------------------------------
 	public OutputStreamSink(OutputStream out) {
@@ -31,6 +32,21 @@ public class OutputStreamSink implements MUDEventProcessor {
 	public OutputStreamSink(OutputStream out, MUDEventPipeline reverse) {
 		this.out = out;
 		this.reversePipe = reverse;
+	}
+
+	//-------------------------------------------------------------------
+	@Override
+	public void setPipeline(MUDEventPipeline pipeline) {
+		this.pipeline = pipeline;
+	}
+
+	//-------------------------------------------------------------------
+	private void notifyClosed(String reason) {
+		if (pipeline != null) {
+			pipeline.receiveFromRemote(this, new PipeClosed(reason));
+		} else if (reversePipe != null) {
+			reversePipe.publish(new PipeClosed(reason));
+		}
 	}
 
 	//-------------------------------------------------------------------
@@ -46,18 +62,14 @@ public class OutputStreamSink implements MUDEventProcessor {
 				out.flush();
 			} catch (Exception e) {
 				logger.log(Level.INFO, "Error writing to OutputStream: "+e);
-				if (reversePipe != null) {
-					reversePipe.publish(new PipeClosed("Error writing to OutputStream: "+e));
-				}
+				notifyClosed("Error writing to OutputStream: "+e);
 			}
 		} else if (event instanceof CloseClientEvent) {
 			try {
 				out.close();
 			} catch (Exception e) {
 				logger.log(Level.INFO, "Error closing OutputStream: "+e);
-				if (reversePipe != null) {
-					reversePipe.publish(new PipeClosed("Error closing OutputStream: "+e));
-				}
+				notifyClosed("Error closing OutputStream: "+e);
 			}
 		} else {
 			logger.log(Logger.Level.WARNING, "Received unsupported event type: "+event.getClass().getName());
