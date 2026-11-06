@@ -16,6 +16,8 @@ public class SpeakerImageEvent implements PipeEvent {
 	private URL external;
 	private byte[] data;
 	private String filename;
+	private String name;
+	private String info;
 	private transient Path origFile;
 	
 	public SpeakerImageEvent(URL external, byte[] data, String filename) {

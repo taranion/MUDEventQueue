@@ -10,6 +10,7 @@ module org.prelle.mudevents {
 	requires transitive org.prelle.libansi;
 	requires org.prelle.mudansi;
 	requires transitive de.rpgframework.rules;
+	requires transitive com.google.gson;
 
-
+	opens org.prelle.mudevents.game to com.google.gson;
 }

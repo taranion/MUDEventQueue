@@ -11,4 +11,8 @@ public record EntityListEvent(
 	public EntityListEvent {
 		entities = entities != null ? List.copyOf(entities) : List.of();
 	}
+
+	public EntityListEvent(EntityListScope scope, EntityItem item) {
+		this(scope, item != null ? List.of(item) : List.of());
+	}
 }
