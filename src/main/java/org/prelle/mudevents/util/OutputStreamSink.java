@@ -47,6 +47,7 @@ public class OutputStreamSink implements MUDEventProcessor {
 		} else if (reversePipe != null) {
 			reversePipe.publish(new PipeClosed(reason));
 		}
+		out = null;
 	}
 
 	//-------------------------------------------------------------------
@@ -55,6 +56,7 @@ public class OutputStreamSink implements MUDEventProcessor {
 	 */
 	@Override
 	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		if (out==null) return List.of();
 		// Convert event into a byte buffer and send it
 		if (event instanceof BinaryDataEvent bde) {
 			try {

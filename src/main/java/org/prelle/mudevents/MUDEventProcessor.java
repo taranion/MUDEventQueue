@@ -8,11 +8,14 @@ import java.util.List;
 public interface MUDEventProcessor {
 	
 	public default String getName() { return getClass().getSimpleName(); }
+	
+	public default boolean processesIncoming(PipeEvent event) { return true; }
 
 	public default List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		return List.of(event);
 	}
 
+	public default boolean processesOutgoing(PipeEvent event) { return true; }
 	public default List<PipeEvent> onSendToRemote(PipeEvent event) {
 		return List.of(event);
 	}

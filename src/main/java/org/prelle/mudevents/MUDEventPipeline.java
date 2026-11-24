@@ -4,6 +4,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -26,6 +27,8 @@ public class MUDEventPipeline {
 	private boolean isSendPipe;
 	private Logger logger;
 	private String name;
+	@Getter @Setter
+	private Locale locale;
 	@Getter
 	private List<MUDEventProcessor> processors = new ArrayList<>();
 	
@@ -234,6 +237,7 @@ public class MUDEventPipeline {
 	 * Legacy entry point. If isSendPipe is true, executes fireSend; otherwise fireReceive.
 	 */
 	public <T extends PipeEvent> void publish(T event) {
+		System.err.println("MUDEventPipeline.publish: "+event);
 		if (logger != null)
 			logger.log(Level.INFO, "{2}: publish: {0} ({1})", event.getClass().getSimpleName(), event.toString(), name);
 		if (isSendPipe) {
@@ -331,6 +335,9 @@ public class MUDEventPipeline {
 				if (logConsumer.isPresent()) {
 					logConsumer.get().accept(new PipeLogEntry(this, nextProcessor, processor, current.toString(), true));
 				}
+				// Avoid calling steps that are not interested in the event
+//				if (!processor.processesOutgoing(current))
+//					continue;
 				List<PipeEvent> produced = processor.onSendToRemote(current);
 				if (produced != null && !produced.isEmpty()) {
 					if (logger != null && produced.size() == 1 && produced.get(0) == current) {
